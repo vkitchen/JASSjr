@@ -139,38 +139,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 |------------|-----------|
 | README.md | This file |
 | LICENSE.txt | A copy of the 2-clause BSD license |
-| JASSjr_index.cpp | C/C++ source code to indexer |
-| JASSjr_search.cpp | C/C++ source code to search engine |
-| JASSjr_index.java | Java source code to indexer |
-| JASSjr_search.java | Java source code to search engine |
-| JASSjr_index.py | Python source code to indexer |
-| JASSjr_search.py | Python source code to search engine |
-| JASSjr_index.js | JavaScript source code to indexer |
-| JASSjr_search.js | JavaScript source code to search engine |
-| JASSjr_index.exs | Elixir source code to indexer |
-| JASSjr_search.exs | Elixir source code to search engine |
-| JASSjr_index.rb | Ruby source code to indexer |
-| JASSjr_search.rb | Ruby source code to search engine |
-| JASSjr_index.pl | Perl source code to indexer |
-| JASSjr_search.pl | Perl source code to search engine |
-| JASSjr_index.go | Go source code to indexer |
-| JASSjr_search.go | Go source code to search engine |
-| JASSjr_index.raku | Raku source code to indexer |
-| JASSjr_search.raku | Raku source code to search engine |
-| JASSjr_index.nim | Nim source code to indexer |
-| JASSjr_search.nim | Nim source code to search engine |
-| JASSjr_index.zig | Zig source code to indexer |
-| JASSjr_search.zig | Zig source code to search engine |
-| JASSjr_index.f90 | Fortran source code to indexer |
-| JASSjr_search.f90 | Fortran source code to search engine |
-| JASSjr_index.d | D source code to indexer |
-| JASSjr_search.d | D source code to search engine |
-| JASSjr_index.php | PHP source code to indexer |
-| JASSjr_search.php | PHP source code to search engine |
-| JASSjr_index.cr | Crystal source code to indexer |
-| JASSjr_search.cr | Crystal source code to search engine |
-| JASSjr_index.lua | Lua source code to indexer |
-| JASSjr_search.lua | Lua source code to search engine |
+| JASSjr_index.* | Source code to indexers in various languages |
+| JASSjr_search.* | Source code to search engines in various languages |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -182,6 +152,27 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | tools/verify_indexer.sh | Verifies an indexer matches the reference implementation |
 | tools/verify_search.sh | Verifies a search engine matches the reference implementation |
 | tools/vocab_diff.py | Debug vocab file differences |
+
+# Languages #
+
+| Language   | Extension | Typing  | Implementation | Year | Build        | Run                      | Shebang |
+| --------   | --------- | ------  | -------------- | ---- | -----        | ---                      | ------- |
+| C++        | .cpp      | static  | compiled       | 1985 | make cpp     | ./JASSjr_search          | no      |
+| Crystal    | .cr       | static  | compiled       | 2014 | make crystal | ./JASSjr_search_crystal  | yes     |
+| D          | .d        | static  | compiled       | 2001 | make d       | ./JASSjr_search_d        | yes     |
+| Elixir     | .exs      | dynamic | bytecode, jit  | 2012 | N/A          | ./JASSjr_search.exs      | yes     |
+| Fortran    | .f90      | static  | compiled       | 1957 | make fortran | ./JASSjr_search_fortran  | no      |
+| Go         | .go       | static  | compiled       | 2009 | N/A          | go run JASSjr_search.go  | no      |
+| Java       | .java     | static  | bytecode, jit  | 1995 | make java    | java JASSjr_search       | no      |
+| JavaScript | .js       | dynamic | bytecode, jit  | 1995 | N/A          | node JASSjr_search.js    | yes     |
+| Lua        | .lua      | dynamic | bytecode, jit  | 1993 | N/A          | luajit JASSjr_search.lua | yes     |
+| Nim        | .nim      | static  | compiled       | 2008 | make nim     | ./JASSjr_search_nim      | yes     |
+| Perl       | .pl       | dynamic | bytecode       | 1987 | N/A          | perl JASSjr_search.pl    | yes     |
+| PHP        | .php      | dynamic | bytecode, jit  | 1995 | N/A          | php JASSjr_search.php    | yes     |
+| Python     | .py       | dynamic | bytecode       | 1991 | N/A          | python JASSjr_search.py  | yes     |
+| Raku       | .raku     | dynamic | bytecode, jit  | 2015 | N/A          | raku JASSjr_search.raku  | yes     |
+| Ruby       | .rb       | dynamic | bytecode       | 1995 | N/A          | ruby JASSjr_search.rb    | yes     |
+| Zig        | .zig      | static  | compiled       | 2016 | make zig     | ./JASSjr_search_zig      | no      |
 
 # Benchmarks #
 
