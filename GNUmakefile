@@ -1,8 +1,8 @@
-all : cpp java crystal d_dmd d_ldc fortran rust zig tools
+all : ada cpp crystal d_dmd d_ldc fortran java rust zig tools
+
+ada : JASSjr_index_ada JASSjr_search_ada
 
 cpp : JASSjr_index JASSjr_search
-
-java : JASSjr_index.class JASSjr_search.class
 
 crystal : JASSjr_index_crystal JASSjr_search_crystal
 
@@ -12,9 +12,17 @@ d_ldc : JASSjr_index_d_ldc JASSjr_search_d_ldc
 
 fortran : JASSjr_index_fortran JASSjr_search_fortran
 
+java : JASSjr_index.class JASSjr_search.class
+
 rust : JASSjr_index_rust JASSjr_search_rust
 
 zig : JASSjr_index_zig JASSjr_search_zig
+
+JASSjr_index_ada : JASSjr_index.adb
+	gnatmake -o JASSjr_index_ada JASSjr_index.adb
+
+JASSjr_search_ada : JASSjr_search.adb
+	gnatmake -o JASSjr_search_ada JASSjr_search.adb
 
 JASSjr_index : JASSjr_index.cpp
 	$(CXX) -std=c++11 -O3 -Wno-unused-result JASSjr_index.cpp -o JASSjr_index
@@ -69,6 +77,7 @@ tools:
 	make -C tools
 
 clean:
+	- rm JASSjr_index_ada JASSjr_search_ada
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
 	- rm JASSjr_index_crystal JASSjr_search_crystal
