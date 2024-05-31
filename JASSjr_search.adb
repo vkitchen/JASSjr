@@ -7,27 +7,26 @@ with Ada.Text_IO;
 use Ada;
 
 procedure JASSjr_search is
-	package Integer_IO is
-		new Sequential_IO (Integer);
-	use Integer_IO;
-	package IIO is
-		new Text_IO.Integer_IO (Integer);
-	package Integer_vectors is
-		new Ada.Containers.Vectors
-			(Index_Type => Natural,
-			Element_Type => Integer);
-	F : Integer_IO.File_Type;
-	V : Integer_Vectors.Vector;
+	package Sequential_Integer_IO is new Sequential_IO (Integer);
+	package Integer_Vector is new Ada.Containers.Vectors
+		( Index_Type => Natural
+		, Element_Type => Integer
+		);
+	package Text_Integer_IO is new Text_IO.Integer_IO (Integer);
+	Doc_lengths_FH : Sequential_Integer_IO.File_Type;
+	Doc_Lengths : Integer_Vector.Vector;
 	Num : Integer;
 begin
-	Open (F, In_File, "lengths.bin");
-	while not End_Of_File (F) loop
-		Read (F, Num);
-		V.Append (Num);
+	-- Read the primary keys
+	-- Read the document lengths
+	Sequential_Integer_IO.Open (Doc_Lengths_FH, Sequential_Integer_IO.In_File, "lengths.bin");
+	while not Sequential_Integer_IO.End_Of_File (Doc_Lengths_FH) loop
+		Sequential_Integer_IO.Read (Doc_Lengths_FH, Num);
+		Doc_Lengths.Append (Num);
 	end loop;
-	Close (F);
-	for Num of V loop
-		IIO.Put (Num);
+	Sequential_Integer_IO.Close (Doc_Lengths_FH);
+	for Num of Doc_Lengths loop
+		Text_Integer_IO.Put (Num);
 		Text_IO.New_Line;
 	end loop;
 end JASSjr_search;
