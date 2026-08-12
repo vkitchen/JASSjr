@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Vaughan Kitchen
+// Copyright (c) 2024, 2026 Vaughan Kitchen
 // Minimalistic BM25 search engine.
 
 const std = @import("std");
@@ -42,47 +42,52 @@ const Lexer = struct {
 };
 
 // Simple indexer for TREC WSJ collection
-pub fn main() !void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const stdout = std.io.getStdOut().writer();
+pub fn main(init: std.process.Init) !void {
+    var arena = init.arena.allocator();
+    var stdout_buffer: [1024]u8 = undefined;
+    var stdout_writer = std.Io.File.stdout().writer(init.io, &stdout_buffer);
+    const stdout = &stdout_writer.interface;
 
-    const argv = try std.process.argsAlloc(arena.allocator());
+    const argv = try init.minimal.args.toSlice(arena);
 
     // Make sure we have one parameter, the filename
     if (argv.len != 2) {
         try stdout.print("Usage: {s} <infile.xml>\n", .{argv[0]});
+        try stdout_writer.flush();
         std.process.exit(0);
     }
 
-    var vocab = std.StringHashMap(std.ArrayList(Posting)).init(arena.allocator());
-    var doc_ids = std.ArrayList([]u8).init(arena.allocator());
-    var doc_lengths = std.ArrayList(i32).init(arena.allocator());
+    var vocab = std.StringHashMap(std.ArrayList(Posting)).init(arena);
+    var doc_ids: std.ArrayList([]u8) = .empty;
+    var doc_lengths: std.ArrayList(i32) = .empty;
 
     var doc_id: i32 = -1;
     var document_length: i32 = 0;
 
-    const fh = try std.fs.cwd().openFile(argv[1], .{});
-    var stream = std.io.bufferedReader(fh.reader());
+    var fh_buffer: [2048]u8 = undefined;
+    var fh = try std.Io.Dir.cwd().openFile(init.io, argv[1], .{});
+    var stream = fh.reader(init.io, &fh_buffer);
 
-    var buf: [2048]u8 = undefined;
     var push_next = false;
-    while (try stream.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try stream.interface.takeDelimiter('\n')) |line| {
         var lex = Lexer.init(line);
         while (lex.next()) |token| {
             if (std.mem.eql(u8, token, "<DOC>")) {
                 // Save the previous document length
                 if (doc_id != -1)
-                    try doc_lengths.append(document_length);
+                    try doc_lengths.append(arena, document_length);
                 // Move on to the next document
                 doc_id += 1;
                 document_length = 0;
-                if (@rem(doc_id, 1000) == 0)
+                if (@rem(doc_id, 1000) == 0) {
                     try stdout.print("{d} documents indexed\n", .{doc_id});
+                    try stdout_writer.flush();
+                }
             }
             // If the last token we saw was a <DOCNO> then the next token is the primary key
             if (push_next) {
-                const primary_key = try arena.allocator().dupe(u8, token);
-                try doc_ids.append(primary_key);
+                const primary_key = try arena.dupe(u8, token);
+                try doc_ids.append(arena, primary_key);
                 push_next = false;
             }
             if (std.mem.eql(u8, token, "<DOCNO>")) {
@@ -102,14 +107,14 @@ pub fn main() !void {
             const gop = try vocab.getOrPut(token2);
             if (!gop.found_existing) {
                 // If the term isn't in the vocab yet
-                const term = try arena.allocator().dupe(u8, token2);
+                const term = try arena.dupe(u8, token2);
                 gop.key_ptr.* = term;
-                gop.value_ptr.* = std.ArrayList(Posting).init(arena.allocator());
-                try gop.value_ptr.append(.{ doc_id, 1 });
+                gop.value_ptr.* = .empty;
+                try gop.value_ptr.append(arena, .{ doc_id, 1 });
             } else {
                 if (gop.value_ptr.getLast()[0] != doc_id) {
                     // If the docno for this occurence has changed then create a new <d,tf> pair
-                    try gop.value_ptr.append(.{ doc_id, 1 });
+                    try gop.value_ptr.append(arena, .{ doc_id, 1 });
                 } else {
                     // Else increase the tf
                     gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
@@ -122,58 +127,63 @@ pub fn main() !void {
     }
 
     // Save the final document length
-    try doc_lengths.append(document_length);
+    try doc_lengths.append(arena, document_length);
 
     // Tell the user we've got to the end of parsing
     try stdout.print("Indexed {d} documents. Serialising...\n", .{doc_id + 1});
+    try stdout_writer.flush();
 
     // Store the primary keys
-    const docids_fh = try std.fs.cwd().createFile("docids.bin", .{});
-    var docids_stream = std.io.bufferedWriter(docids_fh.writer());
+    var docids_buffer: [1024]u8 = undefined;
+    const docids_fh = try std.Io.Dir.cwd().createFile(init.io, "docids.bin", .{});
+    var docids_stream = docids_fh.writer(init.io, &docids_buffer);
 
     for (doc_ids.items) |primary_key| {
-        try docids_stream.writer().writeAll(primary_key);
-        try docids_stream.writer().writeByte('\n');
+        try docids_stream.interface.writeAll(primary_key);
+        try docids_stream.interface.writeByte('\n');
     }
 
     // Serialise the in-memory index to disk
-    const postings_fh = try std.fs.cwd().createFile("postings.bin", .{});
-    var postings_stream = std.io.bufferedWriter(postings_fh.writer());
+    var postings_buffer: [1024]u8 = undefined;
+    const postings_fh = try std.Io.Dir.cwd().createFile(init.io, "postings.bin", .{});
+    var postings_stream = postings_fh.writer(init.io, &postings_buffer);
 
-    const vocab_fh = try std.fs.cwd().createFile("vocab.bin", .{});
-    var vocab_stream = std.io.bufferedWriter(vocab_fh.writer());
+    var vocab_buffer: [1024]u8 = undefined;
+    const vocab_fh = try std.Io.Dir.cwd().createFile(init.io, "vocab.bin", .{});
+    var vocab_stream = vocab_fh.writer(init.io, &vocab_buffer);
 
     var where: usize = 0;
     var it = vocab.iterator();
     while (it.next()) |kv| {
         // Write the postings list to one file
-        try postings_stream.writer().writeAll(std.mem.sliceAsBytes(kv.value_ptr.items));
+        try postings_stream.interface.writeAll(std.mem.sliceAsBytes(kv.value_ptr.items));
 
         // Write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
-        try vocab_stream.writer().writeByte(@truncate(kv.key_ptr.len));
-        try vocab_stream.writer().writeAll(kv.key_ptr.*);
-        try vocab_stream.writer().writeByte(0);
-        try vocab_stream.writer().writeInt(u32, @truncate(where), native_endian);
-        try vocab_stream.writer().writeInt(u32, @truncate(kv.value_ptr.items.len * 8), native_endian);
+        try vocab_stream.interface.writeByte(@truncate(kv.key_ptr.len));
+        try vocab_stream.interface.writeAll(kv.key_ptr.*);
+        try vocab_stream.interface.writeByte(0);
+        try vocab_stream.interface.writeInt(u32, @truncate(where), native_endian);
+        try vocab_stream.interface.writeInt(u32, @truncate(kv.value_ptr.items.len * 8), native_endian);
 
         where += kv.value_ptr.items.len * 8;
     }
 
     // Store the document lengths
-    const lengths_fh = try std.fs.cwd().createFile("lengths.bin", .{});
-    var lengths_stream = std.io.bufferedWriter(lengths_fh.writer());
-    try lengths_stream.writer().writeAll(std.mem.sliceAsBytes(doc_lengths.items));
+    var lengths_buffer: [1024]u8 = undefined;
+    const lengths_fh = try std.Io.Dir.cwd().createFile(init.io, "lengths.bin", .{});
+    var lengths_stream = lengths_fh.writer(init.io, &lengths_buffer);
+    try lengths_stream.interface.writeAll(std.mem.sliceAsBytes(doc_lengths.items));
 
     // Cleanup
     try lengths_stream.flush();
-    lengths_fh.close();
+    lengths_fh.close(init.io);
 
     try vocab_stream.flush();
-    vocab_fh.close();
+    vocab_fh.close(init.io);
 
     try postings_stream.flush();
-    postings_fh.close();
+    postings_fh.close(init.io);
 
     try docids_stream.flush();
-    docids_fh.close();
+    docids_fh.close(init.io);
 }
