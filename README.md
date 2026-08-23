@@ -149,6 +149,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.py | Python source code to search engine |
 | JASSjr_index.js | JavaScript source code to indexer |
 | JASSjr_search.js | JavaScript source code to search engine |
+| JASSjr_index.jl | Julia source code to indexer |
+| JASSjr_search.jl | Julia source code to search engine |
 | JASSjr_index.exs | Elixir source code to indexer |
 | JASSjr_search.exs | Elixir source code to search engine |
 | JASSjr_index.rb | Ruby source code to indexer |
@@ -209,6 +211,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Go       | 1.21.11                   | Lexer  | Array        | 8.51s    | 150ms   | 460ms     |
 | Java     | 1.8.0_412                 | Lexer  | Array        | 11.06s   | 200ms   | 710ms     |
 | JS       | node v21.7.3              | Regex  | Array        | 20.23s   | 610ms   | 1.72s     |
+| Julia    | 1.11.6                    | Regex  | Array        | _        | _       | _         |
 | Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 38.89s   | 260ms   | 710ms     |
 | Nim      | 2.0.4                     | Regex  | Array        | 9.00s    | 670ms   | 1.20s     |
 | Perl     | v5.38.2                   | Regex  | Array        | 61.39s   | 50ms    | 1.62s     |
