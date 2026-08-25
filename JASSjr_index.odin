@@ -9,6 +9,7 @@ package main
 
 import "core:bufio"
 import "core:fmt"
+import "core:mem"
 import "core:os"
 import "core:strings"
 
@@ -210,5 +211,120 @@ main :: proc() {
 	*/
 	if docid == -1 {
 		os.exit(0)
+	}
+
+	/*
+		Save the final document length
+	*/
+	append(&doc_lengths, document_length)
+
+	/*
+		tell the user we've got to the end of parsing
+	*/
+	fmt.printfln("Indexed %d documents. Serialising...", docid + 1)
+
+	/*
+		store the primary keys
+	*/
+	{
+		docid_fh, err := os.create("docids.bin")
+		if err != nil {
+			fmt.eprintfln("Can't create file %v", err);
+			os.exit(1);
+		}
+		defer os.close(docid_fh)
+
+		for id in doc_ids {
+			os.write_string(docid_fh, id)
+			os.write_string(docid_fh, "\n")
+		}
+	}
+
+	/*
+		serialise the in-memory index to disk
+	*/
+	{
+		postings_fh: ^os.File
+		vocab_fh: ^os.File
+		err: os.Error
+
+		postings_fh, err = os.create("postings.bin")
+		if err != nil {
+			fmt.eprintfln("Can't create file %v", err);
+			os.exit(1);
+		}
+		defer os.close(postings_fh)
+
+		vocab_fh, err = os.create("vocab.bin")
+		if err != nil {
+			fmt.eprintfln("Can't create file %v", err);
+			os.exit(1);
+		}
+		defer os.close(vocab_fh)
+
+		for term, postings in vocab {
+			/*
+				write the postings list to one file
+			*/
+			whence: i64
+			whence, err = os.seek(postings_fh, 0, .Current)
+			if err != nil {
+				fmt.eprintfln("Can't seek file %v", err);
+				os.exit(1);
+			}
+			_, err = os.write_slice(postings_fh, postings[:])
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+
+			/*
+				write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
+			*/
+			_, err = os.write_byte(vocab_fh, u8(len(term)))
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+			_, err = os.write_string(vocab_fh, term)
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+			_, err = os.write_byte(vocab_fh, 0)
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+
+			_, err = os.write(vocab_fh, mem.any_to_bytes(u32(whence)))
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+			_, err = os.write(vocab_fh, mem.any_to_bytes(u32(len(postings) * 8)))
+			if err != nil {
+				fmt.eprintfln("Write failed %v", err);
+				os.exit(1);
+			}
+		}
+	}
+
+	/*
+		store the document lengths
+	*/
+	{
+		lengths_fh, err := os.create("lengths.bin")
+		if err != nil {
+			fmt.eprintfln("Can't create file %v", err);
+			os.exit(1);
+		}
+		defer os.close(lengths_fh)
+
+		_, err = os.write_slice(lengths_fh, doc_lengths[:])
+		if err != nil {
+			fmt.eprintfln("Write failed %v", err);
+			os.exit(1);
+		}
 	}
 }

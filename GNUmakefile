@@ -1,4 +1,4 @@
-all : cpp java crystal d_dmd d_ldc fortran rust zig tools
+all : cpp java crystal d_dmd d_ldc fortran odin rust zig tools
 
 cpp : JASSjr_index JASSjr_search
 
@@ -11,6 +11,8 @@ d_dmd : JASSjr_index_d_dmd JASSjr_search_d_dmd
 d_ldc : JASSjr_index_d_ldc JASSjr_search_d_ldc
 
 fortran : JASSjr_index_fortran JASSjr_search_fortran
+
+odin : JASSjr_index_odin
 
 rust : JASSjr_index_rust JASSjr_search_rust
 
@@ -51,6 +53,9 @@ JASSjr_index_fortran : JASSjr_index.f90
 
 JASSjr_search_fortran : JASSjr_search.f90
 	gfortran -std=f2003 -O3 -Wall -Wextra JASSjr_search.f90 -o JASSjr_search_fortran
+
+JASSjr_index_odin : JASSjr_index.odin
+	odin build JASSjr_index.odin -file -o:speed -microarch:native -no-bounds-check -out:JASSjr_index_odin
 
 JASSjr_index_rust : JASSjr_index.rs
 	rustc -O -o JASSjr_index_rust JASSjr_index.rs
