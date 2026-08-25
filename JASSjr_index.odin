@@ -182,17 +182,17 @@ main :: proc() {
 			/*
 				add the posting to the in-memory index
 			*/
-			list, ok := vocab[token]
+			list, ok := vocab[lowercase]
 
 			if !ok {
 				// term isn't in the vocab yet
 				list = make([dynamic]Posting)
-				vocab[token] = list
+				vocab[lowercase] = list
 			}
 
 			if len(list) == 0 || list[len(list)-1].d != docid {
 				// if the docno for this occurence has changed then create a new <d,tf> pair
-				append(&vocab[token], Posting{docid, 1})
+				append(&vocab[lowercase], Posting{docid, 1})
 			} else {
 				// else increase the tf
 				list[len(list)-1].tf += 1
