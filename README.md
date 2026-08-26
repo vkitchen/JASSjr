@@ -163,6 +163,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.raku | Raku source code to search engine |
 | JASSjr_index.nim | Nim source code to indexer |
 | JASSjr_search.nim | Nim source code to search engine |
+| JASSjr_index.odin | Odin source code to indexer |
+| JASSjr_search.odin | Odin source code to search engine |
 | JASSjr_index.zig | Zig source code to indexer |
 | JASSjr_search.zig | Zig source code to search engine |
 | JASSjr_index.f90 | Fortran source code to indexer |
@@ -214,6 +216,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Julia    | 1.11.6                    | Regex  | Array        | _        | _       | _         |
 | Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 38.89s   | 260ms   | 710ms     |
 | Nim      | 2.0.4                     | Regex  | Array        | 9.00s    | 670ms   | 1.20s     |
+| Odin     | dev-2026-08               | Lexer  | Array        | _        | _       | _         |
 | Perl     | v5.38.2                   | Regex  | Array        | 61.39s   | 50ms    | 1.62s     |
 | PHP      | 8.3.8/Zend v4.3.8         | Regex  | HashMap      | 18.84s   | 150ms   | 410ms     |
 | Python   | 2.7.18                    | Regex  | HashMap      | 38.41s   | 370ms   | 830ms     |
