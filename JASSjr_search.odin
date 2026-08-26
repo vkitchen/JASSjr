@@ -47,7 +47,7 @@ main :: proc() {
 	data, err := os.read_entire_file("lengths.bin", context.allocator)
 	assert(err == nil)
 
-	doc_lengths := transmute([]u32)data
+	doc_lengths := slice.reinterpret([]u32, data)
 
 	/*
 		Compute the average document length for BM25
@@ -116,7 +116,7 @@ main :: proc() {
 		/*
 			Zero the accumulator array.
 		*/
-		mem.zero(raw_data(rsv), len(rsv))
+		mem.zero(raw_data(rsv), len(rsv) * size_of(f64))
 
 		line := bufio.scanner_text(&scanner)
 		query_id: int
