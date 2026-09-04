@@ -12,7 +12,7 @@ d_ldc : JASSjr_index_d_ldc JASSjr_search_d_ldc
 
 fortran : JASSjr_index_fortran JASSjr_search_fortran
 
-hare : JASSjr_index_hare
+hare : JASSjr_index_hare JASSjr_search_hare
 
 odin : JASSjr_index_odin JASSjr_search_odin
 
@@ -58,6 +58,9 @@ JASSjr_search_fortran : JASSjr_search.f90
 
 JASSjr_index_hare : JASSjr_index.ha
 	hare build -Ro JASSjr_index_hare JASSjr_index.ha
+
+JASSjr_search_hare : JASSjr_search.ha
+	hare build -Ro JASSjr_search_hare JASSjr_search.ha
 
 JASSjr_index_odin : JASSjr_index.odin
 	odin build JASSjr_index.odin -file -o:speed -microarch:native -no-bounds-check -out:JASSjr_index_odin
