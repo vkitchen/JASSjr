@@ -91,7 +91,6 @@ for term, postings in vocab.items():
     # write the postings list to one file
     where = postings_fp.tell()
     postings.tofile(postings_fp)
-    print(len(postings) * 4)
 
     # write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
     vocab_fp.write(struct.pack('B', len(term)))
