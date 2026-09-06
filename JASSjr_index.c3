@@ -53,11 +53,16 @@ fn String? Lexer.next(Lexer *l)
 	/*
 		Return the token
 	*/
-	return (String)@clone_slice((char[])l.buffer[start..l.current-1]);
+	return l.buffer[start..l.current-1];
 }
 
 fn int main(String[] args)
 {
+	// Force the index onto the heap for performance
+	vocab.init(mem);
+	doc_ids.init(mem);
+	doc_lengths.init(mem);
+
 	int docid = -1;
 	int document_length = 0;
 
@@ -77,78 +82,88 @@ fn int main(String[] args)
 	defer fp.close();
 
 	bool push_next = false; // is the next token the primary key?
-	while (try String line = io::readline(mem, &fp))
+	while (true)
 	{
-		defer free(line);
-
-		Lexer lexer = { line, 0 };
-		while (try String token = lexer.next())
+		@pool()
 		{
-			/*
-				If we see a <DOC> tag then we're at the start of the next document
-			*/
-			if (token == "<DOC>")
+			String? line = io::readline(tmem, &fp);
+			if (catch line) break;
+
+			Lexer lexer = { line, 0 };
+			while (try String token = lexer.next())
 			{
 				/*
-					Save the previous document length
+					If we see a <DOC> tag then we're at the start of the next document
 				*/
-				if (docid != -1) doc_lengths.push(document_length);
+				if (token == "<DOC>")
+				{
+					/*
+						Save the previous document length
+					*/
+					if (docid != -1) doc_lengths.push(document_length);
+
+					/*
+						Move on to the next document
+					*/
+					docid++;
+					document_length = 0;
+
+					if ((docid % 1000) == 0) io::printfn("%d documents indexed", docid);
+				}
 
 				/*
-					Move on to the next document
+					if the last token we saw was a <DOCNO> then the next token is the primary key
 				*/
-				docid++;
-				document_length = 0;
+				if (push_next)
+				{
+					String primary_key = (String)@clone_slice((char[])token);
+					doc_ids.push(primary_key);
+					push_next = false;
+				}
+				if (token == "<DOCNO>") push_next = true;
 
-				if ((docid % 1000) == 0) io::printfn("%d documents indexed", docid);
+				/*
+					Don't index XML tags
+				*/
+				if (token[0] == '<') continue;
+
+				/*
+					lower case the string
+				*/
+				for (int i = 0; i < token.len; i++) token[i] = ascii::to_lower(token[i]);
+
+				/*
+					truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
+				*/
+				if (token.len > 255) token = token[:255];
+
+				/*
+					add the posting to the in-memory index
+				*/
+				PostingsList* list = vocab.get_or_create_ref(token);
+				if (list.len() == 0)
+				{
+					// if the term isn't in the vocab yet
+					list.init(mem);
+					list.push({ docid, 1 });
+				}
+				else if (list.last()!!.first != docid)
+				{
+					// if the docno for this occurence has changed then create a new <d,tf> pair
+					list.push({ docid, 1 });
+				}
+				else
+				{
+					// else increase the tf
+					list.get_ref(list.len() - 1).second++;
+				}
+
+				/*
+					Compute the document length
+				*/
+				document_length++;
 			}
-
-			/*
-				if the last token we saw was a <DOCNO> then the next token is the primary key
-			*/
-			if (push_next)
-			{
-				String primary_key = (String)@clone_slice((char[])token);
-				doc_ids.push(primary_key);
-				push_next = false;
-			}
-			if (token == "<DOCNO>") push_next = true;
-
-			/*
-				Don't index XML tags
-			*/
-			if (token[0] == '<') continue;
-
-			/*
-				lower case the string
-			*/
-			for (int i = 0; i < token.len; i++) token[i] = ascii::to_lower(token[i]);
-
-			/*
-				truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
-			*/
-			if (token.len > 255) token = token[:255];
-
-			/*
-				add the posting to the in-memory index
-			*/
-			PostingsList* list = vocab.get_or_create_ref(token);
-			if (list.len() == 0 || list.last()!!.first != docid)
-			{
-				// if the docno for this occurence has changed then create a new <d,tf> pair
-				list.push({ docid, 1 });
-			}
-			else
-			{
-				// else increase the tf
-				list.get_ref(list.len() - 1).second++;
-			}
-
-			/*
-				Compute the document length
-			*/
-			document_length++;
-		}
+		};
 	}
 
 	/*
