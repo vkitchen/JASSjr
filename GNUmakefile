@@ -1,4 +1,4 @@
-all : cpp java crystal d_dmd d_ldc fortran hare odin rust zig tools
+all : cpp java crystal d_dmd d_ldc fortran hare odin rust vala zig tools
 
 cpp : JASSjr_index JASSjr_search
 
@@ -17,6 +17,8 @@ hare : JASSjr_index_hare JASSjr_search_hare
 odin : JASSjr_index_odin JASSjr_search_odin
 
 rust : JASSjr_index_rust JASSjr_search_rust
+
+vala : JASSjr_index_vala
 
 zig : JASSjr_index_zig JASSjr_search_zig
 
@@ -73,6 +75,9 @@ JASSjr_index_rust : JASSjr_index.rs
 
 JASSjr_search_rust : JASSjr_search.rs
 	rustc -O -o JASSjr_search_rust JASSjr_search.rs
+
+JASSjr_index_vala : JASSjr_index.vala
+	valac -X -O3 --pkg gee-0.8 --pkg gio-2.0 JASSjr_index.vala -o JASSjr_index_vala
 
 JASSjr_index_zig : JASSjr_index.zig
 	zig build-exe -O ReleaseFast --name JASSjr_index_zig JASSjr_index.zig
