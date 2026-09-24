@@ -18,7 +18,7 @@ odin : JASSjr_index_odin JASSjr_search_odin
 
 rust : JASSjr_index_rust JASSjr_search_rust
 
-vala : JASSjr_index_vala
+vala : JASSjr_index_vala JASSjr_search_vala
 
 zig : JASSjr_index_zig JASSjr_search_zig
 
@@ -78,6 +78,9 @@ JASSjr_search_rust : JASSjr_search.rs
 
 JASSjr_index_vala : JASSjr_index.vala
 	valac -X -O3 --pkg gee-0.8 --pkg gio-2.0 JASSjr_index.vala -o JASSjr_index_vala
+
+JASSjr_search_vala : JASSjr_search.vala
+	valac -X -O3 --pkg gee-0.8 --pkg gio-2.0 --pkg posix JASSjr_search.vala -o JASSjr_search_vala
 
 JASSjr_index_zig : JASSjr_index.zig
 	zig build-exe -O ReleaseFast --name JASSjr_index_zig JASSjr_index.zig

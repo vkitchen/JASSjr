@@ -11,6 +11,7 @@
 /JASSjr_index_d_ldc
 /JASSjr_index_fortran
 /JASSjr_index_rust
+/JASSjr_index_vala
 /JASSjr_index_zig
 
 /JASSjr_search
@@ -19,6 +20,7 @@
 /JASSjr_search_d_ldc
 /JASSjr_search_fortran
 /JASSjr_search_rust
+/JASSjr_search_vala
 /JASSjr_search_zig
 
 /tools/show_document
