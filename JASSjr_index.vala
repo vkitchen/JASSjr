@@ -169,8 +169,10 @@ public class JASSjrIndexer : Object {
 
         // store the primary keys
         var docid_stream = new DataOutputStream (
-            File.new_for_path ("docids.bin").replace (
-                null, false, FileCreateFlags.NONE
+            new BufferedOutputStream (
+                File.new_for_path ("docids.bin").replace (
+                    null, false, FileCreateFlags.NONE
+                )
             )
         );
 
@@ -181,14 +183,18 @@ public class JASSjrIndexer : Object {
 
         // serialise the in-memory index to disk
         var postings_stream = new DataOutputStream (
-            File.new_for_path ("postings.bin").replace (
-                null, false, FileCreateFlags.NONE
+            new BufferedOutputStream (
+                File.new_for_path ("postings.bin").replace (
+                    null, false, FileCreateFlags.NONE
+                )
             )
         );
         postings_stream.set_byte_order (LITTLE_ENDIAN);
         var vocab_stream = new DataOutputStream (
-            File.new_for_path ("vocab.bin").replace (
-                null, false, FileCreateFlags.NONE
+            new BufferedOutputStream (
+                File.new_for_path ("vocab.bin").replace (
+                    null, false, FileCreateFlags.NONE
+                )
             )
         );
         vocab_stream.set_byte_order (LITTLE_ENDIAN);
@@ -213,8 +219,10 @@ public class JASSjrIndexer : Object {
 
         // store the document lengths
         var lengths_stream = new DataOutputStream (
-            File.new_for_path ("lengths.bin").replace (
-                null, false, FileCreateFlags.NONE
+            new BufferedOutputStream (
+                File.new_for_path ("lengths.bin").replace (
+                    null, false, FileCreateFlags.NONE
+                )
             )
         );
         lengths_stream.set_byte_order (LITTLE_ENDIAN);
