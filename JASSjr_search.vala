@@ -66,13 +66,13 @@ class JASSjrSearch {
          var vocab_stream = new DataInputStream (
             File.new_for_path ("vocab.bin").read ()
         );
+        vocab_stream.set_byte_order (LITTLE_ENDIAN);
 
         try {
             while (true) {
                 int length = vocab_stream.read_byte ();
 
-                string term = (string) vocab_stream.read_bytes (length);
-                vocab_stream.read_byte (); // read the '\0' string terminator
+                string term = (string) vocab_stream.read_bytes (length + 1).get_data ();
 
                 uint32 where = vocab_stream.read_uint32 ();
                 uint32 size = vocab_stream.read_uint32 ();
@@ -106,7 +106,7 @@ class JASSjrSearch {
             for (int i = 0; i < scores.length; i++)
                 scores[i] = 0;
 
-            string[] tokens = query.split (" ");
+            string[] tokens = query.strip ().split (" ");
 
             bool first = true;
             int64 query_id = 0;
@@ -181,7 +181,7 @@ class JASSjrSearch {
              */
             int limit = int.min (1000, rsv_pointers.length);
             for (int position = 0; *rsv_pointers[position] != 0.0 && position < limit; position++) {
-                uint64 docid = (uint64) rsv_pointers[position] - (uint64) scores;
+                uint64 docid = ((uint64) rsv_pointers[position] - (uint64) scores) / sizeof(double);
 
                 stdout.printf ("%" + int64.FORMAT + " Q0 %s %d %.4f JASSjr\n", query_id, docids[docid], position + 1, scores[docid]);
             }
