@@ -137,8 +137,10 @@
           tokens)
         ; Sort the results list
         (sort! rsv-pointers
-          (lambda (a b)
-            (> (vector-ref rsv a) (vector-ref rsv b))))
+          (lambda (ap bp)
+            (let ((a (vector-ref rsv ap))
+                  (b (vector-ref rsv bp)))
+              (if (> a b) #t (if (= a b) (> ap bp) #f)))))
         ; Print the (at most) top 1000 documents in the results list in TREC eval format which is:
         ; query-id Q0 document-id rank score run-name
         (for-each-with-index
