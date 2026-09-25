@@ -60,7 +60,8 @@
 	      '())))))
 
 (define (float->4dp x)
-  (let* ((s (number->string x))
+  (let* ((rounded (/ (round (* x 10000)) 10000))
+         (s (number->string rounded))
          (dot (substring-index "." s)))
     (if dot
       (substring (string-append s "0000") 0 (+ dot 5))
