@@ -116,7 +116,7 @@ class JASSjrSearch {
             foreach (string token in tokens) {
                 /*
                  * If the first token is a number then assume a TREC query number, and skip it
-				*/
+                */
                 if (first && token[0].isdigit ()) {
                     query_id = int64.parse (token);
                     first = false;
@@ -177,7 +177,7 @@ class JASSjrSearch {
 
             /*
              * Print the (at most) top 1000 documents in the results list in TREC eval format which is:
-			 * query-id Q0 document-id rank score run-name
+             * query-id Q0 document-id rank score run-name
              */
             int limit = int.min (1000, rsv_pointers.length);
             for (int position = 0; *rsv_pointers[position] != 0.0 && position < limit; position++) {
