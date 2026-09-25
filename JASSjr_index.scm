@@ -69,17 +69,17 @@
               ; if the term isn't in the vocab yet
               ((not postings)
                (hash-table-set! vocab lowercase
-                  (list docid 1)))
+                  (list 1 docid)))
 
               ; if the docno for this occurence has changed then create a new <d,tf> pair
-              ((not (= (car postings) docid))
+              ((not (= (cadr postings) docid))
                 (hash-table-set! vocab lowercase
-                  (cons docid (cons 1 postings))))
+                  (cons 1 (cons docid postings))))
 
               ; else increase the tf
               (else
-                (set-car! (cdr postings)
-                  (+ (cadr postings) 1)))))
+                (set-car! postings
+                  (+ (car postings) 1)))))
 
           ; Compute the document length
           (set! document-length (+ document-length 1))))
