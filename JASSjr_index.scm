@@ -1,4 +1,4 @@
-#!/usr/bin/env -S csi -r7rs-syntax -ss
+#!/usr/bin/env -S csi -r7rs-syntax -s
 
 ; JASSJR_INDEX.SCM
 ; ----------------
