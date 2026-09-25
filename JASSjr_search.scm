@@ -45,7 +45,7 @@
     (for-each-pair f (cddr xs))))
 
 (define (for-each-with-index f lst)
-  (let loop ((lst lst) (index 0))
+  (let loop ((lst lst) (index 1))
     (unless (null? lst)
       (f index (car lst))
       (loop (cdr lst) (+ index 1)))))
@@ -58,6 +58,13 @@
 	  (if (pred x)
 	      (cons x (recur (cdr lis)))
 	      '())))))
+
+(define (float->4dp x)
+  (let* ((s (number->string x))
+         (dot (substring-index "." s)))
+    (if dot
+      (substring (string-append s "0000") 0 (+ dot 5))
+      (string-append s ".0000"))))
 
 ; Read the document lengths
 (define doc-lengths
@@ -135,6 +142,6 @@
         ; query-id Q0 document-id rank score run-name
         (for-each-with-index
           (lambda (idx p)
-            (print query-id " Q0 " (vector-ref doc-ids p) " " idx " " (vector-ref rsv p) " JASSjr"))
+            (print query-id " Q0 " (vector-ref doc-ids p) " " idx " " (float->4dp (vector-ref rsv p)) " JASSjr"))
           (take-while (lambda (p) (not (zero? (vector-ref rsv p)))) (vector->list (vector-copy rsv-pointers 0 (min 1000 (vector-length rsv-pointers)))))))
       (loop (read-line)))))
