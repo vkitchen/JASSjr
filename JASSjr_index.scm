@@ -9,7 +9,6 @@
 ; chicken-install srfi-69
 
 (import
-  scheme
   (scheme base)
   srfi-69
   (chicken bitwise)
@@ -81,7 +80,7 @@
 
                 ; else increase the tf
                 (else
-                  (set-cdr! postings
+                  (set-car! (cdr postings)
                     (+ (cadr postings) 1)))))))
 
         ; Compute the document length
@@ -153,3 +152,5 @@
         (lambda (port)
           (write-bytevector (u32vector->bytevector/shared (list->u32vector (reverse doc-lengths))) port)))
     )))
+
+(main (command-line-arguments))
