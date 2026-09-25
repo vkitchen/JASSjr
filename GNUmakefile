@@ -41,10 +41,10 @@ JASSjr_search_crystal : JASSjr_search.cr
 	crystal build --release -o JASSjr_search_crystal JASSjr_search.cr
 
 JASSjr_index_chicken : JASSjr_index.scm
-	csc -O5 JASSjr_index.scm -o JASSjr_index_chicken
+	csc -r7rs-syntax -O5 JASSjr_index.scm -o JASSjr_index_chicken
 
 JASSjr_search_chicken : JASSjr_search.scm
-	csc -O5 JASSjr_search.scm -o JASSjr_search_chicken
+	csc -r7rs-syntax -O5 JASSjr_search.scm -o JASSjr_search_chicken
 
 JASSjr_index_d_dmd : JASSjr_index.d
 	dmd -O -of=JASSjr_index_d_dmd JASSjr_index.d
