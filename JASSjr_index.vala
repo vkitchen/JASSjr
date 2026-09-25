@@ -185,11 +185,13 @@ public class JASSjrIndexer : Object {
                 null, false, FileCreateFlags.NONE
             )
         );
+        postings_stream.set_byte_order (LITTLE_ENDIAN);
         var vocab_stream = new DataOutputStream (
             File.new_for_path ("vocab.bin").replace (
                 null, false, FileCreateFlags.NONE
             )
         );
+        vocab_stream.set_byte_order (LITTLE_ENDIAN);
 
         foreach (string term in vocab.keys) {
             // write the postings list to one file
@@ -215,6 +217,7 @@ public class JASSjrIndexer : Object {
                 null, false, FileCreateFlags.NONE
             )
         );
+        lengths_stream.set_byte_order (LITTLE_ENDIAN);
 
         foreach (int32? length in doc_lengths)
             lengths_stream.put_int32 (length);
