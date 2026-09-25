@@ -27,6 +27,7 @@ class JASSjrSearch {
     string[] docids; // the list of global IDs (i.e. primary keys)
     uint32[] lengths;
     double average_length;
+    uint8[] postings_buffer; // the postings list once loaded from disk
     double[] scores; // array of rsv values
     double*[] rsv_pointers;
 
@@ -84,6 +85,7 @@ class JASSjrSearch {
         /*
          * Allocate buffers
          */
+        postings_buffer = new uint8[lengths.length * 2 * sizeof(uint32)];
         scores = new double[lengths.length];
 
         /*
@@ -146,13 +148,11 @@ class JASSjrSearch {
                  */
                 postings_file.seek ((int64) entry.where, SeekType.SET);
 
-                uint8[] data = new uint8[entry.size];
                 size_t bytes_read;
+                postings_file.read_all (postings_buffer[0:entry.size], out bytes_read);
 
-                postings_file.read_all (data, out bytes_read);
-
-                unowned uint32[] postings = (uint32[]) data;
-                postings.length = data.length / (int)sizeof(uint32);
+                unowned uint32[] postings = (uint32[]) postings_buffer;
+                postings.length = (int) (bytes_read / sizeof(uint32));
 
                 /*
                  * Process the postings list by simply adding the BM25 component for this document into the accumulators array
