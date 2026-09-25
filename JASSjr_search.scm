@@ -132,7 +132,7 @@
                   ; Process the postings list by simply adding the BM25 component for this document into the accumulators array
                   (for-each-pair
                     (lambda (d tf)
-                      (vector-set! rsv d (/ (* idf tf (+ k1 1)) (+ tf (* k1 (+ (- 1 b) (* b (/ (u32vector-ref doc-lengths d) average-doc-length))))))))
+                      (vector-set! rsv d (+ (vector-ref rsv d) (/ (* idf tf (+ k1 1)) (+ tf (* k1 (+ (- 1 b) (* b (/ (u32vector-ref doc-lengths d) average-doc-length)))))))))
                     (u32vector->list (bytevector->u32vector/shared (read-bytevector (cdr term-details) postings-file))))))))
           tokens)
         ; Sort the results list
