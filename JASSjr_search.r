@@ -121,7 +121,7 @@ repeat {
     # Sort the results list. Tie break on the document ID.
     ranking <- order(
         -scores[candidates],
-        candidates
+        -candidates
     )
 
     candidates <- candidates[
